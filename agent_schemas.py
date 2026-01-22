@@ -7,4 +7,5 @@ class GithubCopilotAgent(TypedDict):
     unstaged_files: List[str]
     staged_files: List[str]
     staged_files_diff: str
+    has_staged_files: bool
     commit_message: str

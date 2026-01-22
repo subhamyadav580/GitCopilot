@@ -2,7 +2,10 @@ import os
 import re
 import subprocess
 from typing import List
+
+from regex import F
 from agent_schemas import GithubCopilotAgent
+from langgraph.graph import END
 
 
 class GitCopilotUtils:
@@ -102,3 +105,10 @@ class GitCopilotUtils:
         resultl =  subprocess.run(["git", "push", "origin", state["branch_name"]], check=True)
         print("Branch pushed:", resultl)
         return {}
+
+    def check_files_to_commit(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
+        if len(state["staged_files_diff"]) > 0:
+            return {"has_staged_files": True}
+        else:
+            print("No files to commit.")
+            return {"has_staged_files": False}
