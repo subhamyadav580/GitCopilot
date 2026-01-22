@@ -16,7 +16,28 @@ class GitCopilotUtils:
         This object contains methods for performing common git operations
         safely.
         """
-        pass
+        self.EXCLUDE_DIRS = {
+            ".cache",
+            "node_modules",
+            ".npm",
+            ".venv",
+            "Library",
+            "Applications",
+        }
+
+
+
+
+    def find_git_repos(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
+        repos = []
+        for dirpath, dirnames, _ in os.walk("~"):
+            dirnames[:] = [d for d in dirnames if d not in self.EXCLUDE_DIRS]
+
+            if ".git" in dirnames:
+                repos.append(dirpath)
+                dirnames[:] = []
+
+        return {"repos_list": repos}
 
     def get_current_git_branch(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
         """
