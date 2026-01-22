@@ -30,7 +30,7 @@ class GitCopilotUtils:
 
     def find_git_repos(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
         repos = []
-        print("Searching for git repositories...")
+        print("Searching for git repositories...", os.walk("~"))
         for dirpath, dirnames, _ in os.walk("~"):
             print("dirpath, dirnames:", dirpath, dirnames)
             dirnames[:] = [d for d in dirnames if d not in self.EXCLUDE_DIRS]
