@@ -19,15 +19,17 @@ class GitCopilotUtils:
         pass
 
     def get_current_git_branch(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
-        # try:
+        """
+        Gets the current git branch.
+
+        Returns:
+            GithubCopilotAgent: AgentState with the current branch name.
+        """
         branch = subprocess.check_output(
             ["git", "branch", "--show-current"],
             stderr=subprocess.DEVNULL
             )
-        print("Current branch:", branch.decode().strip())
         return {"branch_name": branch.decode().strip()}
-        # except subprocess.CalledProcessError:
-        #     return {"branch_name": ""}
 
 
     def git_unstaged_files(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
@@ -35,7 +37,7 @@ class GitCopilotUtils:
         Lists all the unstaged files.
 
         Returns:
-            List[str]: List of file names in the current directory.
+            GithubCopilotAgent: AgentState with the list of unstaged files.
         """
         result = subprocess.run(
             ["git", "diff", "--name-only"],
@@ -50,10 +52,10 @@ class GitCopilotUtils:
         staging any files.
 
         Args:
-            files (List[str]): List of file names to stage
+            state (GithubCopilotAgent): AgentState with the list of unstaged files.
 
         Returns:
-            subprocess.CompletedProcess: The result of the subprocess.
+            GithubCopilotAgent: AgentState with the list of staged files.
         """
         valid = [f for f in state["unstaged_files"] if os.path.exists(f)]
         if not valid:
@@ -65,10 +67,10 @@ class GitCopilotUtils:
 
     def get_staged_diff(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
         """
-        Returns the diff of all staged files (git diff --cached).
+        Gets the diff of the staged files.
 
         Returns:
-            str: Unified diff text.
+            GithubCopilotAgent: AgentState with the diff of the staged files.
         """
         result = subprocess.run(
             ["git", "diff", "--cached"],
@@ -79,34 +81,46 @@ class GitCopilotUtils:
 
 
     def commit_files(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
+
         """
         Commits all the staged files with a given message.
 
         Args:
-            message (str): The commit message.
+            state (GithubCopilotAgent): AgentState with the commit message.
 
         Returns:
-            subprocess.CompletedProcess: The result of the subprocess.
+            GithubCopilotAgent: AgentState with no additional information.
+
         """
         commit_result = subprocess.run(["git", "commit", "-m", state['commit_message']], check=True)
         print("Files committed with message:", commit_result)
         return {}
 
     def push_branch(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
+
         """
         Pushes the current branch to the remote repository.
 
         Args:
-            branch (str, optional): The name of the branch to push. Defaults to "main".
+            state (GithubCopilotAgent): AgentState with the branch name.
 
         Returns:
-            subprocess.CompletedProcess: The result of the subprocess.
+            GithubCopilotAgent: AgentState with no additional information.
         """
         resultl =  subprocess.run(["git", "push", "origin", state["branch_name"]], check=True)
         print("Branch pushed:", resultl)
         return {}
 
     def check_files_to_commit(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
+        """
+        Checks if there are any staged files to commit.
+
+        Args:
+            state (GithubCopilotAgent): AgentState with the staged files diff.
+
+        Returns:
+            GithubCopilotAgent: AgentState with a boolean indicating if there are staged files.
+        """
         if len(state["staged_files_diff"]) > 0:
             return {"has_staged_files": True}
         else:
