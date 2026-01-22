@@ -29,22 +29,17 @@ class GitCopilotUtils:
     def find_git_repos(self, state: GithubCopilotAgent) -> dict:
         repos = []
         home = os.path.expanduser("~")
-
         print("Searching for git repositories...")
-
         for dirpath, dirnames, _ in os.walk(home, topdown=True, followlinks=False):
-            # 1️⃣ Stop immediately if repo found
             if ".git" in dirnames:
                 repos.append(dirpath)
-                dirnames.clear()  # fastest way to stop traversal
+                dirnames.clear() 
                 continue
 
-            # 2️⃣ Aggressive prune
             dirnames[:] = [
                 d for d in dirnames
                 if d not in self.EXCLUDE_DIRS
             ]
-
         return {"repos_list": repos}
 
 
@@ -140,6 +135,54 @@ class GitCopilotUtils:
         resultl =  subprocess.run(["git", "push", "origin", state["branch_name"]], check=True)
         print("Branch pushed:", resultl)
         return {}
+    
+    def select_and_navigate_repo(self, state: GithubCopilotAgent) -> dict:
+        """
+        Selects a git repository from the list and navigates to it
+        after user confirmation.
+        """
+        repos = state.get("repos_list", [])
+
+        if not repos:
+            print("No git repositories found.")
+            return {}
+
+        print("\nChoose a repository to navigate to:")
+        for i, repo_path in enumerate(repos):
+            print(f"{i + 1}. {repo_path}")
+        print(f"{len(repos) + 1}. Exit")
+
+        try:
+            choice = int(input("\nEnter the number of the repository: ")) - 1
+
+            if choice == len(repos):
+                print("Exiting without selecting a repository.")
+                return {}
+
+            if not (0 <= choice < len(repos)):
+                print("Invalid choice.")
+                return {}
+
+            selected_repo = repos[choice]
+
+            # 🔐 Confirmation step
+            confirm = input(
+                f"Confirm navigation to:\n{selected_repo}\n(y/n): "
+            ).strip().lower()
+
+            if confirm not in {"y", "yes"}:
+                print("Navigation cancelled.")
+                return {}
+
+            os.chdir(selected_repo)
+            print(f"Navigated to repository: {selected_repo}")
+
+            return {"repo_path": selected_repo}
+
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+            return {}
+
 
     def check_files_to_commit(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
         """

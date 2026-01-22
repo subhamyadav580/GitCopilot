@@ -10,6 +10,7 @@ graph = StateGraph(GithubCopilotAgent)
 
 
 graph.add_node("find_git_repos", gitUtils.find_git_repos)
+graph.add_node("select_and_navigate_repo", gitUtils.select_and_navigate_repo)
 graph.add_node("get_current_git_branch", gitUtils.get_current_git_branch)
 graph.add_node("list_unstaged_files", gitUtils.git_unstaged_files)
 graph.add_node("stage_files_safe", gitUtils.stage_files_safe)
@@ -21,7 +22,15 @@ graph.add_node("push_branch", gitUtils.push_branch)
 
 
 graph.add_edge(START, "find_git_repos")
-graph.add_edge("find_git_repos", "get_current_git_branch")
+graph.add_edge("find_git_repos", "select_and_navigate_repo")
+graph.add_conditional_edges(
+    "select_and_navigate_repo",
+    lambda state: (
+        "get_current_git_branch"
+        if state["repo_path"] != ""
+        else END
+    ),
+)
 graph.add_edge("get_current_git_branch", "list_unstaged_files")
 graph.add_edge("list_unstaged_files", "stage_files_safe")
 graph.add_edge("stage_files_safe", "get_staged_diff")
