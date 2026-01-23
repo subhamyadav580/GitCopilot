@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
-from git_utils import GitCopilotUtils
-from agent_schemas import GithubCopilotAgent
-from review_agent import CommitMessageGenerator
+from core.git_utils import GitCopilotUtils
+from core.agent_schemas import GithubCopilotAgent
+from core.review_agent import CommitMessageGenerator
 
 
 gitUtils = GitCopilotUtils()
@@ -49,5 +49,8 @@ graph.add_edge("push_branch", END)
 app = graph.compile()
 
 
-print("List files: ", app.invoke({}))
+def run_agent():
+    print("Running GitCopilot agent...")
+    return app.invoke({})
+
 

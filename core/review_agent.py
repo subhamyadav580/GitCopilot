@@ -1,11 +1,8 @@
 from langchain import hub
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-import os
-
-from agent_schemas import GithubCopilotAgent
+from core.agent_schemas import GithubCopilotAgent
 from langchain_core.output_parsers import PydanticOutputParser
-
 from pydantic import BaseModel, Field
 
 

@@ -1,0 +1,26 @@
+[project]
+name = "gitcopilot"
+version = "0.1.0"
+description = "AI-powered Git CLI"
+requires-python = ">=3.9"
+
+dependencies = [
+    "langchain==0.3.25",
+    "langchain-core==0.3.75",
+    "langchain-openai==0.3.24",
+    "langgraph==0.6.6",
+    "pydantic==2.10.6",
+    "typer"
+]
+
+[project.scripts]
+gitcopilot = "gitcopilot.cli:main"
+
+
+[tool.setuptools.packages.find]
+include = [
+    "gitcopilot",
+    "gitcopilot.*",
+    "core",
+    "core.*"
+]

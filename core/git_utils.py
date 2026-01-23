@@ -1,12 +1,6 @@
 import os
-import re
 import subprocess
-from typing import List
-
-from regex import F
-from agent_schemas import GithubCopilotAgent
-from langgraph.graph import END
-
+from core.agent_schemas import GithubCopilotAgent
 
 class GitCopilotUtils:
     def __init__(self):
@@ -57,18 +51,36 @@ class GitCopilotUtils:
         return {"branch_name": branch.decode().strip()}
 
 
-    def git_unstaged_files(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
+    def git_unstaged_files(self, state: GithubCopilotAgent) -> dict:
         """
-        Lists all the unstaged files.
+        Lists all unstaged files with absolute paths.
+        """
+        print("Listing unstaged files...")
 
-        Returns:
-            GithubCopilotAgent: AgentState with the list of unstaged files.
-        """
+        # 1️⃣ Get repo root
+        repo_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            check=True
+        ).stdout.strip()
+
+        # 2️⃣ Get unstaged files (relative paths)
         result = subprocess.run(
             ["git", "diff", "--name-only"],
-            capture_output=True, text=True
+            capture_output=True,
+            text=True,
+            check=True
         )
-        return {"unstaged_files": result.stdout.strip().splitlines()}
+
+        # 3️⃣ Convert to absolute paths
+        unstaged_files = [
+            os.path.join(repo_root, path)
+            for path in result.stdout.splitlines()
+            if path.strip()
+        ]
+        print("Unstaged files found:", unstaged_files)
+        return {"unstaged_files": unstaged_files}
 
     def stage_files_safe(self, state: GithubCopilotAgent)-> GithubCopilotAgent:
         """
@@ -82,6 +94,7 @@ class GitCopilotUtils:
         Returns:
             GithubCopilotAgent: AgentState with the list of staged files.
         """
+        print("Staging files...", os.getcwd(), state)
         valid = [f for f in state["unstaged_files"] if os.path.exists(f)]
         if not valid:
             print("No valid files to stage")
