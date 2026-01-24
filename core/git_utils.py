@@ -1,4 +1,5 @@
 import os
+import stat
 import subprocess
 from core.agent_schemas import GithubCopilotAgent
 
@@ -82,26 +83,63 @@ class GitCopilotUtils:
         print("Unstaged files found:", unstaged_files)
         return {"unstaged_files": unstaged_files}
 
-    def stage_files_safe(self, state: GithubCopilotAgent)-> GithubCopilotAgent:
+    def stage_files_safe(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
         """
-        Stages files in the current directory. If any of the files
-        passed do not exist, prints a message and returns without
-        staging any files.
-
-        Args:
-            state (GithubCopilotAgent): AgentState with the list of unstaged files.
-
-        Returns:
-            GithubCopilotAgent: AgentState with the list of staged files.
+        Interactively select files to stage.
         """
-        print("Staging files...", os.getcwd(), state)
-        valid = [f for f in state["unstaged_files"] if os.path.exists(f)]
-        if not valid:
-            print("No valid files to stage")
-            return {"staged_files": valid}
+        files = state.get("unstaged_files", [])
 
-        result = subprocess.run(["git", "add"] + valid, check=True)
-        return {"staged_files": valid}
+        if not files:
+            print("No unstaged files found.")
+            return {"staged_files": []}
+
+        # Validate file existence
+        valid_files = [f for f in files if os.path.exists(f)]
+        if not valid_files:
+            print("No valid files to stage.")
+            return {"staged_files": []}
+
+        print("\nUnstaged files:")
+        for i, file in enumerate(valid_files, start=1):
+            print(f"{i}. {file}")
+
+        print("\nChoose files to stage:")
+        print("  a  → stage all")
+        print("  q  → cancel")
+        print("  1,3,4,... → stage selected files")
+
+        choice = input("\nYour choice: ").strip().lower()
+
+        if choice == "q":
+            print("Staging cancelled.")
+            return {"staged_files": []}
+
+        if choice == "a":
+            selected = valid_files
+        else:
+            try:
+                indexes = [
+                    int(i.strip()) - 1
+                    for i in choice.split(",")
+                ]
+                selected = [
+                    valid_files[i]
+                    for i in indexes
+                    if 0 <= i < len(valid_files)
+                ]
+            except ValueError:
+                print("Invalid input. No files staged.")
+                return {"staged_files": []}
+
+        if not selected:
+            print("No files selected.")
+            return {"staged_files": []}
+
+        subprocess.run(["git", "add"] + selected, check=True)
+        print(f"Staged {len(selected)} file(s).")
+
+        return {"staged_files": selected}
+
 
     def get_staged_diff(self, state: GithubCopilotAgent) -> GithubCopilotAgent:
         """
