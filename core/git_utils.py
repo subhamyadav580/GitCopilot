@@ -196,7 +196,7 @@ class GitCopilotUtils:
 
         if not repos:
             print("No git repositories found.")
-            return {}
+            return {"repo_path": ""}
 
         print("\nChoose a repository to navigate to:")
         for i, repo_path in enumerate(repos):
@@ -208,11 +208,11 @@ class GitCopilotUtils:
 
             if choice == len(repos):
                 print("Exiting without selecting a repository.")
-                return {}
+                return {"repo_path": ""}
 
             if not (0 <= choice < len(repos)):
                 print("Invalid choice.")
-                return {}
+                return {"repo_path": ""}
 
             selected_repo = repos[choice]
 
@@ -223,7 +223,7 @@ class GitCopilotUtils:
 
             if confirm not in {"y", "yes"}:
                 print("Navigation cancelled.")
-                return {}
+                return {"repo_path": ""}
 
             os.chdir(selected_repo)
             print(f"Navigated to repository: {selected_repo}")
