@@ -1,4 +1,4 @@
-# PersonalGitCopilot
+# GitCopilot
 
 GitCopilot is an AI-powered Git CLI tool that automates your daily Git workflow:
 
@@ -29,7 +29,7 @@ All with one command.
 * Git installed and configured
 * OpenAI API key
 
-Set the API key in your environment (PersonalGitCopilot reads it automatically):
+Set the API key in your environment (GitCopilot reads it automatically):
 ```
 export OPENAI_API_KEY=sk-xxxx
 ```
@@ -41,7 +41,7 @@ You can add this to your ```~/.zshrc``` or ```~/.bashrc``` to avoid setting it e
 Install directly from GitHub:
 
 ```
-pip install git+https://github.com/subhamyadav580/PersonalGitCopilot.git
+pip install git+https://github.com/subhamyadav580/GitCopilot.git
 ```
 
 Verify installation:
