@@ -49,8 +49,13 @@ graph.add_edge("push_branch", END)
 app = graph.compile()
 
 
-def run_agent():
-    print("Running GitCopilot agent...")
-    return app.invoke({})
+# def run_agent():
+#     print("Running GitCopilot agent...")
+#     return app.invoke({})
+
+# run_agent()
 
 
+
+for event in app.stream({}):
+    print("Event", event)
